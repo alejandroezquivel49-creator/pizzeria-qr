@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
 type Producto = {
-  id: numbe
+  id: number
   nombre: string
   precio: number
   disponible: boolean
