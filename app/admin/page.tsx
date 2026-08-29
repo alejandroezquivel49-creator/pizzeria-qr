@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
 type Producto = {
-  id: number
+  id: numbe
   nombre: string
   precio: number
   disponible: boolean
@@ -110,7 +110,7 @@ export default function AdminPage() {
      <button onClick={agregarProducto} style={{ padding: '8px 16px' }}>
           Agregar
         </button>
-
+</div>
       <h3>Productos existentes</h3>
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {productos.map((p) => (
