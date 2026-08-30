@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 
 function LoginContent() {
   const router = useRouter()
@@ -40,7 +41,10 @@ function LoginContent() {
 
     <div className="min-h-screen bg-carbon flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
-        <p className="font-display italic text-tomato text-lg mb-1 text-center">🍕 Napoli</p>
+        <div className="flex items-center justify-center gap-2 mb-1">
+  <Image src="/pizza.jpg" alt="Pizza" width={28} height={28} className="rounded-full object-cover" />
+  <p className="font-display italic text-tomato text-lg">Napoli</p>
+</div>
         <h2 className="font-display text-2xl text-cream text-center mb-8">Acceso staff</h2>
 
         <div className="space-y-3">

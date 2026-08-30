@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 
 export default function Home() {
@@ -13,9 +14,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center">
-      <div className="w-16 h-16 rounded-full bg-tomato flex items-center justify-center text-3xl mb-6 shadow-lg shadow-tomato/20">
-        🍕
-      </div>
+	<div className="w-28 h-28 rounded-full overflow-hidden mb-6 shadow-lg shadow-tomato/20 border-4 border-tomato">
+  <Image src="/pizza.jpg" alt="Pizza" width={112} height={112} className="object-cover w-full h-full" />
+</div>      
       <h1 className="font-display italic text-5xl text-carbon tracking-tight">
         Pizzería Napoli
       </h1>
