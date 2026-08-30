@@ -81,7 +81,7 @@ export default function CocinaPage() {
     )
 
   return (
-    <RequireAuth>
+    <RequireAuth roles={['admin', 'cocina']}>
       <div className="min-h-screen bg-carbon px-6 py-10">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-1">

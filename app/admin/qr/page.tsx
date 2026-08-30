@@ -35,7 +35,7 @@ export default function QrPage() {
     )
 
   return (
-    <RequireAuth>
+        <RequireAuth roles={['admin']}>
       <style>{`
         @media print {
           .no-imprimir { display: none; }

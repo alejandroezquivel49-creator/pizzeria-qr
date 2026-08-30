@@ -77,7 +77,7 @@ export default function AdminPage() {
     )
 
   return (
-    <RequireAuth>
+      <RequireAuth roles={['admin']}>
       <div className="min-h-screen bg-carbon px-6 py-10">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-8">
