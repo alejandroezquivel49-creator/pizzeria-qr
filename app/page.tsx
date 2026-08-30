@@ -1,24 +1,21 @@
-import { supabase } from '@/lib/supabase'
-
-export default async function Home() {
-  const { data: productos, error } = await supabase
-    .from('productos')
-    .select('*')
-
-  if (error) {
-    return <div style={{ padding: 40 }}>Error: {error.message}</div>
-  }
-
+export default function Home() {
   return (
-    <div style={{ padding: 40, fontFamily: 'sans-serif' }}>
-      <h1>Productos de la pizzería</h1>
-      <ul>
-        {productos?.map((p) => (
-          <li key={p.id}>
-            {p.nombre} — ${p.precio}
-          </li>
-        ))}
-      </ul>
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'sans-serif',
+        textAlign: 'center',
+        padding: 40,
+      }}
+    >
+      <h1>🍕 Pizzería Napoli</h1>
+      <p style={{ color: '#888', marginTop: 8 }}>
+        Escaneá el código QR de tu mesa para ver el menú y hacer tu pedido.
+      </p>
     </div>
   )
 }
