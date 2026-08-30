@@ -24,35 +24,39 @@ export default function LoginPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'sans-serif',
-      }}
-    >
-      <div style={{ width: 300 }}>
-        <h2>Ingresar</h2>
-        <input
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{ display: 'block', marginBottom: 8, padding: 8, width: '100%' }}
-        />
-        <input
-          placeholder="Contraseña"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-          style={{ display: 'block', marginBottom: 8, padding: 8, width: '100%' }}
-        />
-        {error && <p style={{ color: 'red', fontSize: 13 }}>{error}</p>}
-        <button onClick={handleLogin} disabled={cargando} style={{ width: '100%', padding: 10 }}>
+    <div className="min-h-screen bg-carbon flex items-center justify-center px-6">
+      <div className="w-full max-w-sm">
+        <p className="font-display italic text-tomato text-lg mb-1 text-center">🍕 Napoli</p>
+        <h2 className="font-display text-2xl text-cream text-center mb-8">Acceso staff</h2>
+
+        <div className="space-y-3">
+          <input
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full bg-carbon-light border border-line-dark rounded-lg px-4 py-3 text-cream placeholder:text-cream/30 outline-none focus:border-tomato transition-colors"
+          />
+          <input
+            placeholder="Contraseña"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+            className="w-full bg-carbon-light border border-line-dark rounded-lg px-4 py-3 text-cream placeholder:text-cream/30 outline-none focus:border-tomato transition-colors"
+          />
+        </div>
+
+        {error && <p className="text-tomato text-sm mt-3 text-center">{error}</p>}
+
+        <button
+          onClick={handleLogin}
+          disabled={cargando}
+          className="w-full mt-5 bg-tomato hover:bg-tomato-dark disabled:opacity-50 transition-colors text-cream font-medium rounded-lg py-3"
+        >
           {cargando ? 'Ingresando...' : 'Ingresar'}
         </button>
+
+        <Link href="/" className="hidden" />
       </div>
     </div>
   )

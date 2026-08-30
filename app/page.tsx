@@ -12,33 +12,37 @@ export default function Home() {
   }, [])
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'sans-serif',
-        textAlign: 'center',
-        padding: 40,
-      }}
-    >
-      <h1>🍕 Pizzería Napoli</h1>
-      <p style={{ color: '#888', marginTop: 8 }}>
+    <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-6 text-center">
+      <div className="w-16 h-16 rounded-full bg-tomato flex items-center justify-center text-3xl mb-6 shadow-lg shadow-tomato/20">
+        🍕
+      </div>
+      <h1 className="font-display italic text-5xl text-carbon tracking-tight">
+        Pizzería Napoli
+      </h1>
+      <p className="text-carbon/60 mt-3 max-w-xs">
         Escaneá el código QR de tu mesa para ver el menú y hacer tu pedido.
       </p>
 
-      <div style={{ marginTop: 60, fontSize: 12, color: '#ccc' }}>
+      <div className="mt-16 pt-6 border-t border-carbon/10 w-full max-w-xs">
         {logueado ? (
-          <>
-            <Link href="/admin" style={{ color: '#ccc', marginRight: 12 }}>Admin</Link>
-            <Link href="/admin/qr" style={{ color: '#ccc', marginRight: 12 }}>Generar QR</Link>
-            <Link href="/cocina" style={{ color: '#ccc', marginRight: 12 }}>Cocina</Link>
-            <Link href="/caja" style={{ color: '#ccc' }}>Caja</Link>
-          </>
+          <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm">
+            <Link href="/admin" className="text-carbon/50 hover:text-tomato transition-colors">
+              Admin
+            </Link>
+            <Link href="/admin/qr" className="text-carbon/50 hover:text-tomato transition-colors">
+              Generar QR
+            </Link>
+            <Link href="/cocina" className="text-carbon/50 hover:text-tomato transition-colors">
+              Cocina
+            </Link>
+            <Link href="/caja" className="text-carbon/50 hover:text-tomato transition-colors">
+              Caja
+            </Link>
+          </div>
         ) : (
-          <Link href="/login" style={{ color: '#ccc' }}>Ingresar</Link>
+          <Link href="/login" className="text-sm text-carbon/40 hover:text-tomato transition-colors">
+            Ingresar como staff
+          </Link>
         )}
       </div>
     </div>
