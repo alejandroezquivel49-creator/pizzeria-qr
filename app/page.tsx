@@ -1,6 +1,16 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
 
 export default function Home() {
+  const [logueado, setLogueado] = useState(false)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setLogueado(!!data.session))
+  }, [])
+
   return (
     <div
       style={{
@@ -20,18 +30,16 @@ export default function Home() {
       </p>
 
       <div style={{ marginTop: 60, fontSize: 12, color: '#ccc' }}>
-        <Link href="/admin" style={{ color: '#ccc', marginRight: 12 }}>
-          Admin
-        </Link>
-        <Link href="/admin/qr" style={{ color: '#ccc', marginRight: 12 }}>
-          Generar QR
-        </Link>
-        <Link href="/cocina" style={{ color: '#ccc', marginRight: 12 }}>
-          Cocina
-        </Link>
-        <Link href="/caja" style={{ color: '#ccc' }}>
-          Caja
-        </Link>
+        {logueado ? (
+          <>
+            <Link href="/admin" style={{ color: '#ccc', marginRight: 12 }}>Admin</Link>
+            <Link href="/admin/qr" style={{ color: '#ccc', marginRight: 12 }}>Generar QR</Link>
+            <Link href="/cocina" style={{ color: '#ccc', marginRight: 12 }}>Cocina</Link>
+            <Link href="/caja" style={{ color: '#ccc' }}>Caja</Link>
+          </>
+        ) : (
+          <Link href="/login" style={{ color: '#ccc' }}>Ingresar</Link>
+        )}
       </div>
     </div>
   )
