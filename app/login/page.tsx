@@ -55,8 +55,6 @@ export default function LoginPage() {
         >
           {cargando ? 'Ingresando...' : 'Ingresar'}
         </button>
-
-        <Link href="/" className="hidden" />
       </div>
     </div>
   )
