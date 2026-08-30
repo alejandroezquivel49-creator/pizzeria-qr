@@ -23,6 +23,13 @@ type Pedido = {
   total: number
 }
 
+const PASOS = ['recibido', 'preparando', 'listo']
+const LABEL_PASO: Record<string, string> = {
+  recibido: 'Recibido',
+  preparando: 'Preparando',
+  listo: 'Listo',
+}
+
 function PedirContent() {
   const searchParams = useSearchParams()
   const numeroMesa = searchParams.get('mesa') || '1'
@@ -49,7 +56,6 @@ function PedirContent() {
     cargar()
   }, [])
 
-  // Escuchar cambios de estado del pedido en tiempo real
   useEffect(() => {
     if (!pedido) return
     const channel = supabase
@@ -62,7 +68,6 @@ function PedirContent() {
         }
       )
       .subscribe()
-
     return () => {
       supabase.removeChannel(channel)
     }
@@ -88,7 +93,6 @@ function PedirContent() {
     if (cantidad === 0) return
     setEnviando(true)
 
-    // 1. Buscar el id de la mesa a partir del número
     const { data: mesa, error: errorMesa } = await supabase
       .from('mesas')
       .select('id')
@@ -101,7 +105,6 @@ function PedirContent() {
       return
     }
 
-    // 2. Crear el pedido
     const { data: nuevoPedido, error: errorPedido } = await supabase
       .from('pedidos')
       .insert({ mesa_id: mesa.id, estado: 'recibido', total })
@@ -114,7 +117,6 @@ function PedirContent() {
       return
     }
 
-    // 3. Crear los items del pedido
     const items = cartItems.map((i) => ({
       pedido_id: nuevoPedido.id,
       producto_id: i.producto.id,
@@ -134,115 +136,149 @@ function PedirContent() {
     setEnviando(false)
   }
 
-  if (cargando) return <div style={{ padding: 40 }}>Cargando menú...</div>
-
-  // Vista: pedido ya enviado, mostrando estado en vivo
-  if (pedido) {
-    const pasos = ['recibido', 'preparando', 'listo']
-    const idx = pasos.indexOf(pedido.estado)
+  if (cargando)
     return (
-      <div style={{ padding: 40, fontFamily: 'sans-serif', maxWidth: 400 }}>
-        <p style={{ color: '#888', fontSize: 13 }}>
-          Mesa {numeroMesa} · Pedido #{pedido.id}
-        </p>
-        <h2>
-          {pedido.estado === 'listo'
-            ? '¡Tu pedido está listo!'
-            : pedido.estado === 'preparando'
-            ? 'Tu pedido está en preparación'
-            : 'Pedido recibido'}
-        </h2>
-        <div style={{ display: 'flex', gap: 8, margin: '16px 0' }}>
-          {pasos.map((p, i) => (
-            <div
-              key={p}
-              style={{
-                flex: 1,
-                padding: 8,
-                textAlign: 'center',
-                borderRadius: 6,
-                background: i <= idx ? '#2A2320' : '#eee',
-                color: i <= idx ? '#fff' : '#888',
-                fontSize: 12,
-              }}
-            >
-              {p}
-            </div>
-          ))}
+      <div className="min-h-screen bg-cream flex items-center justify-center text-carbon/40 text-sm">
+        Cargando menú...
+      </div>
+    )
+
+  // Vista: pedido enviado, seguimiento en vivo
+  if (pedido) {
+    const idx = PASOS.indexOf(pedido.estado)
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center px-6">
+        <div className="w-full max-w-sm">
+          <p className="text-carbon/40 text-xs uppercase tracking-widest text-center mb-1">
+            Mesa {numeroMesa} · #{pedido.id}
+          </p>
+          <h2 className="font-display italic text-3xl text-carbon text-center mb-8">
+            {pedido.estado === 'listo'
+              ? '¡Tu pedido está listo!'
+              : pedido.estado === 'preparando'
+              ? 'Preparando tu pedido'
+              : 'Pedido recibido'}
+          </h2>
+
+          <div className="flex items-center mb-10">
+            {PASOS.map((paso, i) => (
+              <div key={paso} className="flex items-center flex-1 last:flex-none">
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono transition-colors ${
+                      i <= idx ? 'bg-tomato text-cream' : 'bg-carbon/10 text-carbon/30'
+                    }`}
+                  >
+                    {i <= idx ? '✓' : i + 1}
+                  </div>
+                  <span
+                    className={`text-[11px] mt-2 ${i === idx ? 'text-carbon font-medium' : 'text-carbon/40'}`}
+                  >
+                    {LABEL_PASO[paso]}
+                  </span>
+                </div>
+                {i < PASOS.length - 1 && (
+                  <div className={`flex-1 h-0.5 mb-5 mx-1 ${i < idx ? 'bg-tomato' : 'bg-carbon/10'}`} />
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="border-t border-carbon/10 pt-4">
+            <p className="text-carbon/40 text-xs uppercase tracking-widest mb-2">Tu pedido</p>
+            <p className="font-mono text-lg text-carbon">${pedido.total}</p>
+            <p className="text-carbon/40 text-xs mt-4 text-center">
+              Pagás en caja al retirar o cuando te lo traigan
+            </p>
+          </div>
         </div>
-        <p style={{ fontSize: 13, color: '#888' }}>Total: ${pedido.total}</p>
-        <p style={{ fontSize: 12, color: '#888' }}>Pagás en caja al retirar o cuando te lo traigan</p>
       </div>
     )
   }
 
   // Vista: menú + carrito
   return (
-    <div style={{ padding: 40, fontFamily: 'sans-serif', maxWidth: 500 }}>
-      <p style={{ color: '#888', fontSize: 13 }}>Mesa {numeroMesa}</p>
-      <h1>Menú</h1>
+    <div className="min-h-screen bg-cream pb-32">
+      <div className="max-w-lg mx-auto px-6 pt-10">
+        <p className="text-tomato text-xs uppercase tracking-widest mb-1">Mesa {numeroMesa}</p>
+        <h1 className="font-display italic text-4xl text-carbon mb-8">Menú</h1>
 
-      {categorias.map((cat) => (
-        <div key={cat.id} style={{ marginBottom: 24 }}>
-          <h3>{cat.nombre}</h3>
-          {productos
-            .filter((p) => p.categoria_id === cat.id)
-            .map((p) => (
-              <div
-                key={p.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: 8,
-                  borderBottom: '1px solid #eee',
-                }}
-              >
-                <span style={{ flex: 1 }}>
-                  {p.nombre} — ${p.precio}
-                </span>
-                {cart[p.id] ? (
-                  <>
-                    <button onClick={() => removeItem(p.id)}>−</button>
-                    <span>{cart[p.id]}</span>
-                    <button onClick={() => addItem(p.id)}>+</button>
-                  </>
-                ) : (
-                  <button onClick={() => addItem(p.id)}>Agregar</button>
-                )}
-              </div>
-            ))}
-        </div>
-      ))}
-
-      <div
-        style={{
-          position: 'sticky',
-          bottom: 10,
-          background: '#2A2320',
-          color: '#fff',
-          padding: 16,
-          borderRadius: 8,
-        }}
-      >
-        <p style={{ margin: '0 0 8px' }}>
-          {cantidad} items — ${total}
-        </p>
-        <button
-          onClick={enviarPedido}
-          disabled={cantidad === 0 || enviando}
-          style={{ width: '100%', padding: 10 }}
-        >
-          {enviando ? 'Enviando...' : 'Enviar pedido'}
-        </button>
+        {categorias.map((cat) => (
+          <div key={cat.id} className="mb-8">
+            <h3 className="text-carbon/40 text-xs uppercase tracking-widest mb-3">{cat.nombre}</h3>
+            <div className="space-y-2">
+              {productos
+                .filter((p) => p.categoria_id === cat.id)
+                .map((p) => (
+                  <div
+                    key={p.id}
+                    className="flex items-center gap-3 bg-white/60 border border-carbon/10 rounded-xl px-4 py-3"
+                  >
+                    <div className="flex-1">
+                      <p className="text-carbon font-medium">{p.nombre}</p>
+                      <p className="font-mono text-carbon/50 text-sm">${p.precio}</p>
+                    </div>
+                    {cart[p.id] ? (
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => removeItem(p.id)}
+                          className="w-7 h-7 rounded-full border border-carbon/20 text-carbon flex items-center justify-center hover:bg-carbon/5"
+                        >
+                          −
+                        </button>
+                        <span className="font-mono w-4 text-center">{cart[p.id]}</span>
+                        <button
+                          onClick={() => addItem(p.id)}
+                          className="w-7 h-7 rounded-full bg-tomato text-cream flex items-center justify-center hover:bg-tomato-dark"
+                        >
+                          +
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => addItem(p.id)}
+                        className="text-sm bg-carbon text-cream rounded-lg px-4 py-2 hover:bg-tomato transition-colors"
+                      >
+                        Agregar
+                      </button>
+                    )}
+                  </div>
+                ))}
+            </div>
+          </div>
+        ))}
       </div>
+
+      {cantidad > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-carbon px-6 py-4">
+          <div className="max-w-lg mx-auto flex items-center gap-4">
+            <div className="flex-1">
+              <p className="text-cream/50 text-xs">{cantidad} items</p>
+              <p className="font-mono text-cream text-lg">${total}</p>
+            </div>
+            <button
+              onClick={enviarPedido}
+              disabled={enviando}
+              className="bg-tomato hover:bg-tomato-dark disabled:opacity-50 transition-colors text-cream font-medium rounded-lg px-6 py-3"
+            >
+              {enviando ? 'Enviando...' : 'Enviar pedido'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
 export default function PedirPage() {
   return (
-    <Suspense fallback={<div style={{ padding: 40 }}>Cargando...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-cream flex items-center justify-center text-carbon/40 text-sm">
+          Cargando...
+        </div>
+      }
+    >
       <PedirContent />
     </Suspense>
   )
