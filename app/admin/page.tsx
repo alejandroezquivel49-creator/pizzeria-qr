@@ -69,88 +69,109 @@ export default function AdminPage() {
     window.location.href = '/login'
   }
 
-  if (cargando) return <div style={{ padding: 40 }}>Cargando...</div>
+  if (cargando)
+    return (
+      <div className="min-h-screen bg-carbon flex items-center justify-center text-cream/50 text-sm">
+        Cargando...
+      </div>
+    )
 
   return (
     <RequireAuth>
-      <div style={{ padding: 40, fontFamily: 'sans-serif', maxWidth: 600 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1>Administrar productos</h1>
-          <div>
-            <a href="/admin/qr" style={{ fontSize: 14, marginRight: 12 }}>
-              Generar códigos QR →
-            </a>
-            <button onClick={cerrarSesion} style={{ fontSize: 13 }}>
-              Cerrar sesión
-            </button>
+      <div className="min-h-screen bg-carbon px-6 py-10">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <p className="text-tomato text-xs tracking-widest uppercase mb-1">Panel staff</p>
+              <h1 className="font-display text-3xl text-cream">Productos</h1>
+            </div>
+            <div className="flex items-center gap-4 text-sm">
+              <a href="/admin/qr" className="text-cream/60 hover:text-wheat transition-colors">
+                Generar QR →
+              </a>
+              <button onClick={cerrarSesion} className="text-cream/40 hover:text-tomato transition-colors">
+                Salir
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-carbon-light border border-line-dark rounded-xl p-5 mb-8">
+            <h3 className="text-cream font-medium mb-4 text-sm uppercase tracking-wide">Nuevo producto</h3>
+            <div className="space-y-3">
+              <input
+                placeholder="Nombre"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                className="w-full bg-carbon border border-line-dark rounded-lg px-4 py-2.5 text-cream placeholder:text-cream/30 outline-none focus:border-tomato transition-colors"
+              />
+              <input
+                placeholder="Precio"
+                type="number"
+                value={precio}
+                onChange={(e) => setPrecio(e.target.value)}
+                className="w-full bg-carbon border border-line-dark rounded-lg px-4 py-2.5 text-cream placeholder:text-cream/30 outline-none focus:border-tomato transition-colors"
+              />
+              <select
+                value={categoriaId}
+                onChange={(e) => setCategoriaId(e.target.value)}
+                className="w-full bg-carbon border border-line-dark rounded-lg px-4 py-2.5 text-cream outline-none focus:border-tomato transition-colors"
+              >
+                <option value="">Elegí una categoría</option>
+                {categorias.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nombre}
+                  </option>
+                ))}
+              </select>
+              <label className="flex items-center gap-2 text-cream/70 text-sm">
+                <input
+                  type="checkbox"
+                  checked={requierePrep}
+                  onChange={(e) => setRequierePrep(e.target.checked)}
+                  className="accent-tomato"
+                />
+                Requiere preparación (destildar para bebidas)
+              </label>
+              <button
+                onClick={agregarProducto}
+                className="w-full bg-tomato hover:bg-tomato-dark transition-colors text-cream font-medium rounded-lg py-2.5"
+              >
+                Agregar
+              </button>
+            </div>
+          </div>
+
+          <h3 className="text-cream/50 text-xs uppercase tracking-widest mb-3">
+            Productos existentes ({productos.length})
+          </h3>
+          <div className="space-y-2">
+            {productos.map((p) => (
+              <div
+                key={p.id}
+                className="flex items-center gap-3 bg-carbon-light border border-line-dark rounded-lg px-4 py-3"
+              >
+                <span className="flex-1 text-cream">{p.nombre}</span>
+                <span className="font-mono text-wheat text-sm">${p.precio}</span>
+                <button
+                  onClick={() => toggleDisponible(p)}
+                  className={`text-xs px-3 py-1.5 rounded-md transition-colors ${
+                    p.disponible
+                      ? 'bg-basil/20 text-basil'
+                      : 'bg-tomato/20 text-tomato'
+                  }`}
+                >
+                  {p.disponible ? 'Disponible' : 'Sin stock'}
+                </button>
+                <button
+                  onClick={() => eliminarProducto(p.id)}
+                  className="text-cream/30 hover:text-tomato transition-colors text-xs px-2"
+                >
+                  Eliminar
+                </button>
+              </div>
+            ))}
           </div>
         </div>
-
-        <div style={{ margin: '20px 0', padding: 16, border: '1px solid #ddd', borderRadius: 8 }}>
-          <h3>Nuevo producto</h3>
-          <input
-            placeholder="Nombre"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            style={{ display: 'block', marginBottom: 8, padding: 6, width: '100%' }}
-          />
-          <input
-            placeholder="Precio"
-            type="number"
-            value={precio}
-            onChange={(e) => setPrecio(e.target.value)}
-            style={{ display: 'block', marginBottom: 8, padding: 6, width: '100%' }}
-          />
-          <select
-            value={categoriaId}
-            onChange={(e) => setCategoriaId(e.target.value)}
-            style={{ display: 'block', marginBottom: 8, padding: 6, width: '100%' }}
-          >
-            <option value="">Elegí una categoría</option>
-            {categorias.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.nombre}
-              </option>
-            ))}
-          </select>
-          <label style={{ display: 'block', marginBottom: 8, fontSize: 14 }}>
-            <input
-              type="checkbox"
-              checked={requierePrep}
-              onChange={(e) => setRequierePrep(e.target.checked)}
-            />{' '}
-            Requiere preparación (destildar para bebidas)
-          </label>
-          <button onClick={agregarProducto} style={{ padding: '8px 16px' }}>
-            Agregar
-          </button>
-        </div>
-
-        <h3>Productos existentes</h3>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {productos.map((p) => (
-            <li
-              key={p.id}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: 8,
-                borderBottom: '1px solid #eee',
-              }}
-            >
-              <span style={{ flex: 1 }}>
-                {p.nombre} — ${p.precio}
-              </span>
-              <button onClick={() => toggleDisponible(p)}>
-                {p.disponible ? 'Disponible' : 'Sin stock'}
-              </button>
-              <button onClick={() => eliminarProducto(p.id)} style={{ color: 'red' }}>
-                Eliminar
-              </button>
-            </li>
-          ))}
-        </ul>
       </div>
     </RequireAuth>
   )
