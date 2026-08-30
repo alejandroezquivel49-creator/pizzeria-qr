@@ -126,3 +126,27 @@ export default function CocinaPage() {
                 <div
                   style={{
                     fontSize: 12,
+                    color: '#888',
+                    marginTop: 6,
+                    borderTop: '1px dashed #ddd',
+                    paddingTop: 6,
+                  }}
+                >
+                  También llevar:{' '}
+                  {p.pedido_items
+                    .filter((it) => !it.productos?.requiere_preparacion)
+                    .map((it) => `${it.cantidad}x ${it.productos?.nombre}`)
+                    .join(', ')}
+                </div>
+              )}
+              <p style={{ fontSize: 12, color: '#888', margin: '8px 0' }}>Total: ${p.total}</p>
+              <button onClick={() => avanzarEstado(p)} style={{ width: '100%', padding: 8 }}>
+                {LABEL_BOTON[p.estado]}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </RequireAuth>
+  )
+}
