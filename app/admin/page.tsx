@@ -70,7 +70,13 @@ export default function AdminPage() {
 
   return (
     <div style={{ padding: 40, fontFamily: 'sans-serif', maxWidth: 600 }}>
-      <h1>Administrar productos</h1>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1>Administrar productos</h1>
+        <a href="/admin/qr" style={{ fontSize: 14 }}>
+          Generar códigos QR →
+        </a>
+      </div>
 
       <div style={{ margin: '20px 0', padding: 16, border: '1px solid #ddd', borderRadius: 8 }}>
         <h3>Nuevo producto</h3>
