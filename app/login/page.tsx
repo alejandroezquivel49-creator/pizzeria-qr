@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 
 function LoginContent() {
