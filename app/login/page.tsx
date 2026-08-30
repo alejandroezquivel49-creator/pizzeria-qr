@@ -23,8 +23,18 @@ function LoginContent() {
       setError('Email o contraseña incorrectos')
       return
     }
-    router.push(next)
-  }
+
+    if (next !== '/admin') {
+      router.push(next)
+      return
+    }
+
+    // Si no venía de un link específico, redirigir según el rol
+    const { data: userData } = await supabase.auth.getUser()
+    const rol = userData.user?.user_metadata?.role
+    if (rol === 'cocina') router.push('/cocina')
+    else if (rol === 'caja') router.push('/caja')
+    else router.push('/admin')
 
   return (
     <div className="min-h-screen bg-carbon flex items-center justify-center px-6">
