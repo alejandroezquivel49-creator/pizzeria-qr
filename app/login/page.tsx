@@ -35,8 +35,9 @@ function LoginContent() {
     if (rol === 'cocina') router.push('/cocina')
     else if (rol === 'caja') router.push('/caja')
     else router.push('/admin')
-
+}
   return (
+
     <div className="min-h-screen bg-carbon flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <p className="font-display italic text-tomato text-lg mb-1 text-center">🍕 Napoli</p>
