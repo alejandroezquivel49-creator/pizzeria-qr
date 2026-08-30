@@ -29,6 +29,12 @@ const LABEL_BOTON: Record<string, string> = {
   preparando: 'Marcar listo',
   listo: 'Entregado',
 }
+const COLOR_ESTADO: Record<string, string> = {
+  recibido: 'bg-tomato/20 text-tomato',
+  preparando: 'bg-wheat/20 text-wheat',
+  listo: 'bg-basil/20 text-basil',
+}
+const ROTACIONES = ['-rotate-1', 'rotate-0', 'rotate-1', '-rotate-[0.5deg]']
 
 export default function CocinaPage() {
   const [pedidos, setPedidos] = useState<Pedido[]>([])
@@ -47,12 +53,10 @@ export default function CocinaPage() {
 
   useEffect(() => {
     cargarPedidos()
-
     const channel = supabase
       .channel('cocina-pedidos')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => cargarPedidos())
       .subscribe()
-
     return () => {
       supabase.removeChannel(channel)
     }
@@ -69,82 +73,79 @@ export default function CocinaPage() {
     window.location.href = '/login'
   }
 
-  if (cargando) return <div style={{ padding: 40 }}>Cargando pedidos...</div>
+  if (cargando)
+    return (
+      <div className="min-h-screen bg-carbon flex items-center justify-center text-cream/50 text-sm">
+        Cargando pedidos...
+      </div>
+    )
 
   return (
     <RequireAuth>
-      <div style={{ padding: 40, fontFamily: 'sans-serif' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1>Pedidos en curso</h1>
-          <button onClick={cerrarSesion} style={{ fontSize: 13 }}>
-            Cerrar sesión
-          </button>
-        </div>
-        <p style={{ color: '#888', fontSize: 13 }}>{pedidos.length} pedidos activos</p>
-
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: 16,
-            marginTop: 20,
-          }}
-        >
-          {pedidos.map((p) => (
-            <div
-              key={p.id}
-              style={{
-                border: '1px solid #ddd',
-                borderRadius: 8,
-                padding: 14,
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <strong>
-                  Mesa {p.mesas?.numero} · #{p.id}
-                </strong>
-                <span
-                  style={{
-                    fontSize: 11,
-                    padding: '2px 8px',
-                    borderRadius: 4,
-                    background:
-                      p.estado === 'recibido' ? '#fde2e2' : p.estado === 'preparando' ? '#fdf0c8' : '#dbf0c9',
-                  }}
-                >
-                  {p.estado}
-                </span>
-              </div>
-              {p.pedido_items
-                .filter((it) => it.productos?.requiere_preparacion)
-                .map((it) => (
-                  <div key={it.id} style={{ fontSize: 13 }}>
-                    {it.cantidad}x {it.productos?.nombre}
-                  </div>
-                ))}
-              {p.pedido_items.some((it) => !it.productos?.requiere_preparacion) && (
-                <div
-                  style={{
-                    fontSize: 12,
-                    color: '#888',
-                    marginTop: 6,
-                    borderTop: '1px dashed #ddd',
-                    paddingTop: 6,
-                  }}
-                >
-                  También llevar:{' '}
-                  {p.pedido_items
-                    .filter((it) => !it.productos?.requiere_preparacion)
-                    .map((it) => `${it.cantidad}x ${it.productos?.nombre}`)
-                    .join(', ')}
-                </div>
-              )}
-              <p style={{ fontSize: 12, color: '#888', margin: '8px 0' }}>Total: ${p.total}</p>
-              <button onClick={() => avanzarEstado(p)} style={{ width: '100%', padding: 8 }}>
-                {LABEL_BOTON[p.estado]}
-              </button>
+      <div className="min-h-screen bg-carbon px-6 py-10">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-1">
+            <div>
+              <p className="text-tomato text-xs tracking-widest uppercase mb-1">Panel staff</p>
+              <h1 className="font-display text-3xl text-cream">Riel de pedidos</h1>
             </div>
-          ))}
+            <button onClick={cerrarSesion} className="text-cream/40 hover:text-tomato transition-colors text-sm">
+              Salir
+            </button>
+          </div>
+          <p className="text-cream/40 text-sm mb-8">{pedidos.length} pedidos activos</p>
+
+          {pedidos.length === 0 ? (
+            <div className="border border-dashed border-line-dark rounded-xl py-16 text-center text-cream/30 text-sm">
+              No hay pedidos en curso. La cocina está tranquila.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {pedidos.map((p, i) => (
+                <div
+                  key={p.id}
+                  className={`bg-cream text-carbon rounded-sm p-4 shadow-xl border-2 border-dashed border-carbon/15 ${ROTACIONES[i % ROTACIONES.length]} hover:rotate-0 transition-transform`}
+                >
+                  <div className="flex items-baseline justify-between mb-1">
+                    <span className="font-mono text-2xl font-medium">#{p.id}</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wide font-medium ${COLOR_ESTADO[p.estado]}`}>
+                      {p.estado}
+                    </span>
+                  </div>
+                  <p className="text-xs text-carbon/50 mb-3 uppercase tracking-wide">Mesa {p.mesas?.numero}</p>
+
+                  <div className="border-t border-b border-dashed border-carbon/15 py-2 mb-3 space-y-1">
+                    {p.pedido_items
+                      .filter((it) => it.productos?.requiere_preparacion)
+                      .map((it) => (
+                        <div key={it.id} className="text-sm font-mono">
+                          {it.cantidad}× {it.productos?.nombre}
+                        </div>
+                      ))}
+                  </div>
+
+                  {p.pedido_items.some((it) => !it.productos?.requiere_preparacion) && (
+                    <p className="text-xs text-carbon/50 mb-3 italic">
+                      También llevar:{' '}
+                      {p.pedido_items
+                        .filter((it) => !it.productos?.requiere_preparacion)
+                        .map((it) => `${it.cantidad}× ${it.productos?.nombre}`)
+                        .join(', ')}
+                    </p>
+                  )}
+
+                  <p className="font-mono text-sm text-carbon/60 mb-3">Total ${p.total}</p>
+
+                  <button
+                    onClick={() => avanzarEstado(p)}
+                    className="w-full bg-carbon hover:bg-carbon-light transition-colors text-cream text-sm font-medium rounded-sm py-2"
+                  >
+                    {LABEL_BOTON[p.estado]}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </RequireAuth>
