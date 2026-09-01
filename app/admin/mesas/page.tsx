@@ -15,6 +15,8 @@ export default function MesasPage() {
   const [mesas, setMesas] = useState<Mesa[]>([])
   const [numero, setNumero] = useState('')
   const [cargando, setCargando] = useState(true)
+  const [editandoId, setEditandoId] = useState<number | null>(null)
+  const [numeroEditado, setNumeroEditado] = useState('')
 
   const cargarMesas = async () => {
     const { data } = await supabase.from('mesas').select('*').order('numero')
@@ -46,6 +48,32 @@ export default function MesasPage() {
 
   const eliminarMesa = async (id: number) => {
     await supabase.from('mesas').delete().eq('id', id)
+    cargarMesas()
+  }
+
+  const empezarEdicion = (m: Mesa) => {
+    setEditandoId(m.id)
+    setNumeroEditado(String(m.numero))
+  }
+
+  const cancelarEdicion = () => {
+    setEditandoId(null)
+    setNumeroEditado('')
+  }
+
+  const guardarEdicion = async (m: Mesa) => {
+    const nuevoNumero = parseInt(numeroEditado)
+    if (!nuevoNumero || nuevoNumero === m.numero) {
+      cancelarEdicion()
+      return
+    }
+    const yaExiste = mesas.some((x) => x.numero === nuevoNumero && x.id !== m.id)
+    if (yaExiste) {
+      alert('Ya existe otra mesa con ese número')
+      return
+    }
+    await supabase.from('mesas').update({ numero: nuevoNumero }).eq('id', m.id)
+    cancelarEdicion()
     cargarMesas()
   }
 
@@ -99,21 +127,54 @@ export default function MesasPage() {
                 key={m.id}
                 className="flex items-center gap-3 bg-carbon-light border border-line-dark rounded-lg px-4 py-3"
               >
-                <span className="flex-1 text-cream font-mono">Mesa {m.numero}</span>
-                <button
-                  onClick={() => toggleActiva(m)}
-                  className={`text-xs px-3 py-1.5 rounded-md transition-colors ${
-                    m.activa ? 'bg-basil/20 text-basil' : 'bg-tomato/20 text-tomato'
-                  }`}
-                >
-                  {m.activa ? 'Activa' : 'Inactiva'}
-                </button>
-                <button
-                  onClick={() => eliminarMesa(m.id)}
-                  className="text-cream/30 hover:text-tomato transition-colors text-xs px-2"
-                >
-                  Eliminar
-                </button>
+                {editandoId === m.id ? (
+                  <>
+                    <input
+                      type="number"
+                      value={numeroEditado}
+                      onChange={(e) => setNumeroEditado(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && guardarEdicion(m)}
+                      autoFocus
+                      className="flex-1 bg-carbon border border-tomato rounded-lg px-3 py-1.5 text-cream font-mono outline-none"
+                    />
+                    <button
+                      onClick={() => guardarEdicion(m)}
+                      className="text-xs px-3 py-1.5 rounded-md bg-basil/20 text-basil"
+                    >
+                      Guardar
+                    </button>
+                    <button
+                      onClick={cancelarEdicion}
+                      className="text-xs px-3 py-1.5 rounded-md bg-cream/10 text-cream/60"
+                    >
+                      Cancelar
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <span className="flex-1 text-cream font-mono">Mesa {m.numero}</span>
+                    <button
+                      onClick={() => empezarEdicion(m)}
+                      className="text-xs px-3 py-1.5 rounded-md bg-cream/10 text-cream/60 hover:text-cream transition-colors"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => toggleActiva(m)}
+                      className={`text-xs px-3 py-1.5 rounded-md transition-colors ${
+                        m.activa ? 'bg-basil/20 text-basil' : 'bg-tomato/20 text-tomato'
+                      }`}
+                    >
+                      {m.activa ? 'Activa' : 'Inactiva'}
+                    </button>
+                    <button
+                      onClick={() => eliminarMesa(m.id)}
+                      className="text-cream/30 hover:text-tomato transition-colors text-xs px-2"
+                    >
+                      Eliminar
+                    </button>
+                  </>
+                )}
               </div>
             ))}
           </div>
