@@ -27,6 +27,12 @@ export default function AdminPage() {
   const [requierePrep, setRequierePrep] = useState(true)
   const [cargando, setCargando] = useState(true)
 
+  const [editandoId, setEditandoId] = useState<number | null>(null)
+  const [editNombre, setEditNombre] = useState('')
+  const [editPrecio, setEditPrecio] = useState('')
+  const [editCategoriaId, setEditCategoriaId] = useState('')
+  const [editRequierePrep, setEditRequierePrep] = useState(true)
+
   const cargarDatos = async () => {
     const { data: prods } = await supabase.from('productos').select('*').order('id')
     const { data: cats } = await supabase.from('categorias').select('*').order('orden')
@@ -60,7 +66,35 @@ export default function AdminPage() {
   }
 
   const eliminarProducto = async (id: number) => {
+    if (!confirm('¿Seguro que querés eliminar este producto?')) return
     await supabase.from('productos').delete().eq('id', id)
+    cargarDatos()
+  }
+
+  const empezarEdicion = (p: Producto) => {
+    setEditandoId(p.id)
+    setEditNombre(p.nombre)
+    setEditPrecio(String(p.precio))
+    setEditCategoriaId(String(p.categoria_id))
+    setEditRequierePrep(p.requiere_preparacion)
+  }
+
+  const cancelarEdicion = () => {
+    setEditandoId(null)
+  }
+
+  const guardarEdicion = async (id: number) => {
+    if (!editNombre || !editPrecio || !editCategoriaId) return
+    await supabase
+      .from('productos')
+      .update({
+        nombre: editNombre,
+        precio: parseFloat(editPrecio),
+        categoria_id: parseInt(editCategoriaId),
+        requiere_preparacion: editRequierePrep,
+      })
+      .eq('id', id)
+    cancelarEdicion()
     cargarDatos()
   }
 
@@ -77,7 +111,7 @@ export default function AdminPage() {
     )
 
   return (
-      <RequireAuth roles={['admin']}>
+    <RequireAuth roles={['admin']}>
       <div className="min-h-screen bg-carbon px-6 py-10">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-8">
@@ -87,11 +121,11 @@ export default function AdminPage() {
             </div>
             <div className="flex items-center gap-4 text-sm">
               <a href="/admin/mesas" className="text-cream/60 hover:text-wheat transition-colors">
-  Mesas
-</a>
-<a href="/admin/qr" className="text-cream/60 hover:text-wheat transition-colors">
-  Generar QR →
-</a>
+                Mesas
+              </a>
+              <a href="/admin/qr" className="text-cream/60 hover:text-wheat transition-colors">
+                Generar QR →
+              </a>
               <button onClick={cerrarSesion} className="text-cream/40 hover:text-tomato transition-colors">
                 Salir
               </button>
@@ -148,31 +182,88 @@ export default function AdminPage() {
             Productos existentes ({productos.length})
           </h3>
           <div className="space-y-2">
-            {productos.map((p) => (
-              <div
-                key={p.id}
-                className="flex items-center gap-3 bg-carbon-light border border-line-dark rounded-lg px-4 py-3"
-              >
-                <span className="flex-1 text-cream">{p.nombre}</span>
-                <span className="font-mono text-wheat text-sm">${p.precio}</span>
-                <button
-                  onClick={() => toggleDisponible(p)}
-                  className={`text-xs px-3 py-1.5 rounded-md transition-colors ${
-                    p.disponible
-                      ? 'bg-basil/20 text-basil'
-                      : 'bg-tomato/20 text-tomato'
-                  }`}
+            {productos.map((p) =>
+              editandoId === p.id ? (
+                <div
+                  key={p.id}
+                  className="bg-carbon-light border border-tomato rounded-lg px-4 py-4 space-y-2"
                 >
-                  {p.disponible ? 'Disponible' : 'Sin stock'}
-                </button>
-                <button
-                  onClick={() => eliminarProducto(p.id)}
-                  className="text-cream/30 hover:text-tomato transition-colors text-xs px-2"
+                  <input
+                    value={editNombre}
+                    onChange={(e) => setEditNombre(e.target.value)}
+                    className="w-full bg-carbon border border-line-dark rounded-lg px-3 py-2 text-cream outline-none focus:border-tomato"
+                  />
+                  <input
+                    type="number"
+                    value={editPrecio}
+                    onChange={(e) => setEditPrecio(e.target.value)}
+                    className="w-full bg-carbon border border-line-dark rounded-lg px-3 py-2 text-cream outline-none focus:border-tomato"
+                  />
+                  <select
+                    value={editCategoriaId}
+                    onChange={(e) => setEditCategoriaId(e.target.value)}
+                    className="w-full bg-carbon border border-line-dark rounded-lg px-3 py-2 text-cream outline-none focus:border-tomato"
+                  >
+                    {categorias.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.nombre}
+                      </option>
+                    ))}
+                  </select>
+                  <label className="flex items-center gap-2 text-cream/70 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={editRequierePrep}
+                      onChange={(e) => setEditRequierePrep(e.target.checked)}
+                      className="accent-tomato"
+                    />
+                    Requiere preparación
+                  </label>
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      onClick={() => guardarEdicion(p.id)}
+                      className="flex-1 bg-basil/20 text-basil text-sm rounded-md py-2"
+                    >
+                      Guardar
+                    </button>
+                    <button
+                      onClick={cancelarEdicion}
+                      className="flex-1 bg-cream/10 text-cream/60 text-sm rounded-md py-2"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  key={p.id}
+                  className="flex items-center gap-3 bg-carbon-light border border-line-dark rounded-lg px-4 py-3"
                 >
-                  Eliminar
-                </button>
-              </div>
-            ))}
+                  <span className="flex-1 text-cream">{p.nombre}</span>
+                  <span className="font-mono text-wheat text-sm">${p.precio}</span>
+                  <button
+                    onClick={() => empezarEdicion(p)}
+                    className="text-xs px-3 py-1.5 rounded-md bg-cream/10 text-cream/60 hover:text-cream transition-colors"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => toggleDisponible(p)}
+                    className={`text-xs px-3 py-1.5 rounded-md transition-colors ${
+                      p.disponible ? 'bg-basil/20 text-basil' : 'bg-tomato/20 text-tomato'
+                    }`}
+                  >
+                    {p.disponible ? 'Disponible' : 'Sin stock'}
+                  </button>
+                  <button
+                    onClick={() => eliminarProducto(p.id)}
+                    className="text-cream/30 hover:text-tomato transition-colors text-xs px-2"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              )
+            )}
           </div>
         </div>
       </div>
