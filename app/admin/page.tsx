@@ -130,9 +130,12 @@ export default function AdminPage() {
               <h1 className="font-display text-3xl text-cream">Productos</h1>
             </div>
             <div className="flex items-center gap-4 text-sm">
-              <a href="/admin/mesas" className="text-cream/60 hover:text-wheat transition-colors">
-                Mesas
-              </a>
+              <a href="/admin/categorias" className="text-cream/60 hover:text-wheat transition-colors">
+  Categorías
+</a>
+<a href="/admin/mesas" className="text-cream/60 hover:text-wheat transition-colors">
+  Mesas
+</a>
               <a href="/admin/qr" className="text-cream/60 hover:text-wheat transition-colors">
                 Generar QR →
               </a>
