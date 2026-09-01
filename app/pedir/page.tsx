@@ -186,7 +186,7 @@ function PedirContent() {
 
           <div className="border-t border-carbon/10 pt-4">
             <p className="text-carbon/40 text-xs uppercase tracking-widest mb-2">Tu pedido</p>
-            <p className="font-mono text-lg text-carbon">${pedido.total}</p>
+           <p className="font-mono text-lg text-carbon">Gs. {pedido.total.toLocaleString('es-PY')}</p>
             <p className="text-carbon/40 text-xs mt-4 text-center">
               Pagás en caja al retirar o cuando te lo traigan
             </p>
@@ -216,7 +216,7 @@ function PedirContent() {
                   >
                     <div className="flex-1">
                       <p className="text-carbon font-medium">{p.nombre}</p>
-                      <p className="font-mono text-carbon/50 text-sm">${p.precio}</p>
+                      <p className="font-mono text-carbon/50 text-sm">Gs. {p.precio.toLocaleString('es-PY')}</p>
                     </div>
                     {cart[p.id] ? (
                       <div className="flex items-center gap-3">
@@ -254,7 +254,7 @@ function PedirContent() {
           <div className="max-w-lg mx-auto flex items-center gap-4">
             <div className="flex-1">
               <p className="text-cream/50 text-xs">{cantidad} items</p>
-              <p className="font-mono text-cream text-lg">${total}</p>
+              <p className="font-mono text-cream text-lg">Gs. {total.toLocaleString('es-PY')}</p>
             </div>
             <button
               onClick={enviarPedido}

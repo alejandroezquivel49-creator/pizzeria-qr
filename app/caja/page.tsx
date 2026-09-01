@@ -92,9 +92,8 @@ export default function CajaPage() {
           <div className="bg-carbon-light border border-line-dark rounded-xl p-6 mb-10 text-center">
             <p className="text-cream/40 text-xs uppercase tracking-widest mb-2">Total cobrado hoy</p>
             <p className="font-mono text-5xl text-wheat">
-              ${totalDelDia.toLocaleString('es-AR')}
-            </p>
-          </div>
+  Gs. {totalDelDia.toLocaleString('es-PY')}
+</p>          </div>
 
           <h3 className="text-cream/50 text-xs uppercase tracking-widest mb-3">
             Pendientes de cobro ({pendientes.length})
@@ -116,7 +115,7 @@ export default function CajaPage() {
                       {p.pedido_items.map((it) => `${it.cantidad}× ${it.productos?.nombre}`).join(', ')}
                     </p>
                   </div>
-                  <span className="font-mono text-wheat">${Number(p.total).toLocaleString('es-AR')}</span>
+                  <span className="font-mono text-wheat">Gs. {Number(p.total).toLocaleString('es-PY')}</span>
                   <button
                     onClick={() => marcarPagado(p.id)}
                     className="bg-basil/20 hover:bg-basil/30 text-basil transition-colors text-xs px-3 py-2 rounded-md font-medium"
@@ -143,7 +142,7 @@ export default function CajaPage() {
                   <span>
                     Mesa {p.mesas?.numero} · <span className="font-mono">#{p.id}</span>
                   </span>
-                  <span className="font-mono">${Number(p.total).toLocaleString('es-AR')}</span>
+          <span className="font-mono">Gs. {Number(p.total).toLocaleString('es-PY')}</span>
                 </div>
               ))}
             </div>

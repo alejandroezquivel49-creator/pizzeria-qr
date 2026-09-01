@@ -134,7 +134,7 @@ export default function CocinaPage() {
                     </p>
                   )}
 
-                  <p className="font-mono text-sm text-carbon/60 mb-3">Total ${p.total}</p>
+                  <p className="font-mono text-sm text-carbon/60 mb-3">Total Gs. {p.total.toLocaleString('es-PY')}</p>
 
                   <button
                     onClick={() => avanzarEstado(p)}

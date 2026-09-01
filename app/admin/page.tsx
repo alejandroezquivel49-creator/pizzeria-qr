@@ -65,9 +65,19 @@ export default function AdminPage() {
     cargarDatos()
   }
 
-  const eliminarProducto = async (id: number) => {
+   const eliminarProducto = async (id: number) => {
     if (!confirm('¿Seguro que querés eliminar este producto?')) return
-    await supabase.from('productos').delete().eq('id', id)
+    const { error } = await supabase.from('productos').delete().eq('id', id)
+    if (error) {
+      if (error.code === '23503') {
+        alert(
+          'No se puede eliminar: este producto ya tiene pedidos asociados en el historial. Marcalo como "Sin stock" en su lugar.'
+        )
+      } else {
+        alert('Error al eliminar: ' + error.message)
+      }
+      return
+    }
     cargarDatos()
   }
 
@@ -240,7 +250,7 @@ export default function AdminPage() {
                   className="flex items-center gap-3 bg-carbon-light border border-line-dark rounded-lg px-4 py-3"
                 >
                   <span className="flex-1 text-cream">{p.nombre}</span>
-                  <span className="font-mono text-wheat text-sm">${p.precio}</span>
+                  <span className="font-mono text-wheat text-sm">Gs. {p.precio.toLocaleString('es-PY')}</span>
                   <button
                     onClick={() => empezarEdicion(p)}
                     className="text-xs px-3 py-1.5 rounded-md bg-cream/10 text-cream/60 hover:text-cream transition-colors"
