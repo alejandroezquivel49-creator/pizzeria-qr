@@ -11,6 +11,7 @@ type Producto = {
   disponible: boolean
   categoria_id: number
   requiere_preparacion: boolean
+  imagen_url: string | null
 }
 
 type Categoria = {
@@ -25,6 +26,8 @@ export default function AdminPage() {
   const [precio, setPrecio] = useState('')
   const [categoriaId, setCategoriaId] = useState('')
   const [requierePrep, setRequierePrep] = useState(true)
+  const [imagenFile, setImagenFile] = useState<File | null>(null)
+  const [subiendoImagen, setSubiendoImagen] = useState(false)
   const [cargando, setCargando] = useState(true)
 
   const [editandoId, setEditandoId] = useState<number | null>(null)
@@ -32,6 +35,8 @@ export default function AdminPage() {
   const [editPrecio, setEditPrecio] = useState('')
   const [editCategoriaId, setEditCategoriaId] = useState('')
   const [editRequierePrep, setEditRequierePrep] = useState(true)
+  const [editImagenFile, setEditImagenFile] = useState<File | null>(null)
+  const [editImagenActual, setEditImagenActual] = useState<string | null>(null)
 
   const cargarDatos = async () => {
     const { data: prods } = await supabase.from('productos').select('*').order('id')
@@ -45,18 +50,40 @@ export default function AdminPage() {
     cargarDatos()
   }, [])
 
+  const subirImagen = async (file: File): Promise<string | null> => {
+    const ext = file.name.split('.').pop()
+    const nombreArchivo = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+    const { error } = await supabase.storage.from('productos').upload(nombreArchivo, file)
+    if (error) {
+      alert('Error al subir la imagen: ' + error.message)
+      return null
+    }
+    const { data } = supabase.storage.from('productos').getPublicUrl(nombreArchivo)
+    return data.publicUrl
+  }
+
   const agregarProducto = async () => {
     if (!nombre || !precio || !categoriaId) return
+
+    let imagenUrl: string | null = null
+    if (imagenFile) {
+      setSubiendoImagen(true)
+      imagenUrl = await subirImagen(imagenFile)
+      setSubiendoImagen(false)
+    }
+
     await supabase.from('productos').insert({
       nombre,
       precio: parseFloat(precio),
       categoria_id: parseInt(categoriaId),
       disponible: true,
       requiere_preparacion: requierePrep,
+      imagen_url: imagenUrl,
     })
     setNombre('')
     setPrecio('')
     setCategoriaId('')
+    setImagenFile(null)
     cargarDatos()
   }
 
@@ -65,7 +92,7 @@ export default function AdminPage() {
     cargarDatos()
   }
 
-   const eliminarProducto = async (id: number) => {
+  const eliminarProducto = async (id: number) => {
     if (!confirm('¿Seguro que querés eliminar este producto?')) return
     const { error } = await supabase.from('productos').delete().eq('id', id)
     if (error) {
@@ -87,6 +114,8 @@ export default function AdminPage() {
     setEditPrecio(String(p.precio))
     setEditCategoriaId(String(p.categoria_id))
     setEditRequierePrep(p.requiere_preparacion)
+    setEditImagenActual(p.imagen_url)
+    setEditImagenFile(null)
   }
 
   const cancelarEdicion = () => {
@@ -95,6 +124,15 @@ export default function AdminPage() {
 
   const guardarEdicion = async (id: number) => {
     if (!editNombre || !editPrecio || !editCategoriaId) return
+
+    let imagenUrl = editImagenActual
+    if (editImagenFile) {
+      setSubiendoImagen(true)
+      const nuevaUrl = await subirImagen(editImagenFile)
+      setSubiendoImagen(false)
+      if (nuevaUrl) imagenUrl = nuevaUrl
+    }
+
     await supabase
       .from('productos')
       .update({
@@ -102,6 +140,7 @@ export default function AdminPage() {
         precio: parseFloat(editPrecio),
         categoria_id: parseInt(editCategoriaId),
         requiere_preparacion: editRequierePrep,
+        imagen_url: imagenUrl,
       })
       .eq('id', id)
     cancelarEdicion()
@@ -131,11 +170,11 @@ export default function AdminPage() {
             </div>
             <div className="flex items-center gap-4 text-sm">
               <a href="/admin/categorias" className="text-cream/60 hover:text-wheat transition-colors">
-  Categorías
-</a>
-<a href="/admin/mesas" className="text-cream/60 hover:text-wheat transition-colors">
-  Mesas
-</a>
+                Categorías
+              </a>
+              <a href="/admin/mesas" className="text-cream/60 hover:text-wheat transition-colors">
+                Mesas
+              </a>
               <a href="/admin/qr" className="text-cream/60 hover:text-wheat transition-colors">
                 Generar QR →
               </a>
@@ -173,6 +212,15 @@ export default function AdminPage() {
                   </option>
                 ))}
               </select>
+              <div>
+                <label className="text-cream/50 text-xs block mb-1.5">Foto del producto (opcional)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImagenFile(e.target.files?.[0] || null)}
+                  className="w-full text-cream/70 text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-tomato/20 file:text-tomato file:cursor-pointer"
+                />
+              </div>
               <label className="flex items-center gap-2 text-cream/70 text-sm">
                 <input
                   type="checkbox"
@@ -184,9 +232,10 @@ export default function AdminPage() {
               </label>
               <button
                 onClick={agregarProducto}
-                className="w-full bg-tomato hover:bg-tomato-dark transition-colors text-cream font-medium rounded-lg py-2.5"
+                disabled={subiendoImagen}
+                className="w-full bg-tomato hover:bg-tomato-dark disabled:opacity-50 transition-colors text-cream font-medium rounded-lg py-2.5"
               >
-                Agregar
+                {subiendoImagen ? 'Subiendo imagen...' : 'Agregar'}
               </button>
             </div>
           </div>
@@ -223,6 +272,24 @@ export default function AdminPage() {
                       </option>
                     ))}
                   </select>
+                  <div>
+                    {editImagenActual && (
+                      <img
+                        src={editImagenActual}
+                        alt=""
+                        className="w-16 h-16 object-cover rounded-lg mb-2"
+                      />
+                    )}
+                    <label className="text-cream/50 text-xs block mb-1.5">
+                      {editImagenActual ? 'Cambiar foto' : 'Agregar foto'}
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setEditImagenFile(e.target.files?.[0] || null)}
+                      className="w-full text-cream/70 text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-tomato/20 file:text-tomato file:cursor-pointer"
+                    />
+                  </div>
                   <label className="flex items-center gap-2 text-cream/70 text-sm">
                     <input
                       type="checkbox"
@@ -235,9 +302,10 @@ export default function AdminPage() {
                   <div className="flex gap-2 pt-1">
                     <button
                       onClick={() => guardarEdicion(p.id)}
-                      className="flex-1 bg-basil/20 text-basil text-sm rounded-md py-2"
+                      disabled={subiendoImagen}
+                      className="flex-1 bg-basil/20 text-basil text-sm rounded-md py-2 disabled:opacity-50"
                     >
-                      Guardar
+                      {subiendoImagen ? 'Subiendo...' : 'Guardar'}
                     </button>
                     <button
                       onClick={cancelarEdicion}
@@ -252,6 +320,11 @@ export default function AdminPage() {
                   key={p.id}
                   className="flex items-center gap-3 bg-carbon-light border border-line-dark rounded-lg px-4 py-3"
                 >
+                  {p.imagen_url ? (
+                    <img src={p.imagen_url} alt="" className="w-10 h-10 object-cover rounded-lg flex-shrink-0" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg bg-carbon flex-shrink-0" />
+                  )}
                   <span className="flex-1 text-cream">{p.nombre}</span>
                   <span className="font-mono text-wheat text-sm">Gs. {p.precio.toLocaleString('es-PY')}</span>
                   <button

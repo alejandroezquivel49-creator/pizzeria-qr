@@ -10,6 +10,7 @@ type Producto = {
   precio: number
   disponible: boolean
   categoria_id: number
+  imagen_url: string | null
 }
 
 type Categoria = {
@@ -214,6 +215,16 @@ function PedirContent() {
                     key={p.id}
                     className="flex items-center gap-3 bg-white/60 border border-carbon/10 rounded-xl px-4 py-3"
                   >
+                    
+		                    {p.imagen_url ? (
+                      <img
+                        src={p.imagen_url}
+                        alt={p.nombre}
+                        className="w-14 h-14 object-cover rounded-lg flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-14 h-14 rounded-lg bg-carbon/5 flex-shrink-0" />
+                    )}
                     <div className="flex-1">
                       <p className="text-carbon font-medium">{p.nombre}</p>
                       <p className="font-mono text-carbon/50 text-sm">Gs. {p.precio.toLocaleString('es-PY')}</p>
